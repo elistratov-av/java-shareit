@@ -7,6 +7,7 @@ import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.Item;
 import ru.practicum.shareit.item.ItemRepository;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +18,7 @@ import java.util.stream.Collectors;
 public class ItemMemRepository implements ItemRepository {
     private long idCounter = 0L;
     private final Map<Long, Item> items = new HashMap<>();
+    private final Map<Long, List<Item>> ownerItems = new HashMap<>();
 
     protected long nextId() {
         return ++idCounter;
@@ -29,9 +31,7 @@ public class ItemMemRepository implements ItemRepository {
 
     @Override
     public List<Item> findAll(long ownerId) {
-        return items.values().stream()
-                .filter(i -> i.getOwner() != null && i.getOwner().getId() == ownerId)
-                .collect(Collectors.toList());
+        return ownerItems.getOrDefault(ownerId, new ArrayList<>());
     }
 
     @Override
@@ -50,6 +50,8 @@ public class ItemMemRepository implements ItemRepository {
         newItem.setId(nextId());
         // сохраняем новую вещь в памяти приложения
         items.put(newItem.getId(), newItem);
+        ownerItems.computeIfAbsent(newItem.getOwner().getId(), k -> new ArrayList<>())
+                .add(newItem);
         return newItem;
     }
 
@@ -71,5 +73,6 @@ public class ItemMemRepository implements ItemRepository {
     @Override
     public void deleteByOwnerId(long ownerId) {
         items.values().removeIf(i -> i.getOwner() != null && i.getOwner().getId() == ownerId);
+        ownerItems.remove(ownerId);
     }
 }

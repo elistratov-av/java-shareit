@@ -1,13 +1,17 @@
 package ru.practicum.shareit.user;
 
+import org.mapstruct.AnnotateWith;
 import org.mapstruct.Mapper;
-import org.mapstruct.factory.Mappers;
+import org.springframework.stereotype.Component;
+import ru.practicum.shareit.user.dto.UserCreateDto;
+import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.dto.UserUpdateDto;
 
 @Mapper
+@AnnotateWith(value = Component.class)
 public interface UserMapper {
-    UserMapper INSTANCE = Mappers.getMapper(UserMapper.class);
-
     UserDto toUserDto(User item);
 
-    User toUser(UserDto item);
+    User toUser(UserCreateDto item);
+    User toUser(UserUpdateDto item);
 }

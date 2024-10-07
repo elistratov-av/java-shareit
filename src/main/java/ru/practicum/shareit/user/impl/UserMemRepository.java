@@ -2,18 +2,22 @@ package ru.practicum.shareit.user.impl;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
+import ru.practicum.shareit.exception.DuplicatedDataException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserRepository;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public class UserMemRepository implements UserRepository {
     private long idCounter = 0L;
     private final Map<Long, User> users = new HashMap<>();
+    private final Set<String> emails = new HashSet<>();
 
     protected long nextId() {
         return ++idCounter;
@@ -26,22 +30,19 @@ public class UserMemRepository implements UserRepository {
 
     @Override
     public boolean isEmailUsed(String email) {
-        return users.values().stream()
-                .anyMatch(u -> email.equals(u.getEmail()));
-    }
-
-    @Override
-    public boolean isEmailUsed(String email, long ignoredUserId) {
-        return users.values().stream()
-                .anyMatch(u -> ignoredUserId != u.getId() && email.equals(u.getEmail()));
+        return emails.contains(email);
     }
 
     @Override
     public User add(User newUser) {
+        if (isEmailUsed(newUser.getEmail()))
+            throw new DuplicatedDataException("Эл. почта " + newUser.getEmail() + " уже используется");
+
         // формируем дополнительные данные
         newUser.setId(nextId());
         // сохраняем нового пользователя в памяти приложения
         users.put(newUser.getId(), newUser);
+        emails.add(newUser.getEmail());
         return newUser;
     }
 
@@ -53,12 +54,19 @@ public class UserMemRepository implements UserRepository {
 
         // если пользователь найден и все условия соблюдены, обновляем его содержимое
         if (StringUtils.isNoneBlank(newUser.getName())) oldUser.setName(newUser.getName());
-        if (StringUtils.isNoneBlank(newUser.getEmail())) oldUser.setEmail(newUser.getEmail());
+        if (StringUtils.isNoneBlank(newUser.getEmail()) && !newUser.getEmail().equals(oldUser.getEmail())) {
+            if (isEmailUsed(newUser.getEmail()))
+                throw new DuplicatedDataException("Эл. почта " + newUser.getEmail() + " уже используется");
+            emails.remove(oldUser.getEmail());
+            oldUser.setEmail(newUser.getEmail());
+            emails.add(newUser.getEmail());
+        }
         return oldUser;
     }
 
     @Override
-    public void delete(long id) {
-        users.remove(id);
+    public void delete(User user) {
+        users.remove(user.getId());
+        emails.remove(user.getEmail());
     }
 }

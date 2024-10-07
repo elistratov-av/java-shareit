@@ -1,5 +1,6 @@
-package ru.practicum.shareit.item;
+package ru.practicum.shareit.user.dto;
 
+import jakarta.validation.constraints.Email;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -7,10 +8,9 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(of = "id")
 @AllArgsConstructor
-public class ItemDto {
+public class UserUpdateDto {
     private Long id;
     private final String name;
-    private final String description;
-    private final Boolean available;
-    private final Long requestId;
+    @Email
+    private final String email;
 }
