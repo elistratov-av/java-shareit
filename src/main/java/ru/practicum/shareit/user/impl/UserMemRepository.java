@@ -5,7 +5,6 @@ import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.exception.DuplicatedDataException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.User;
-import ru.practicum.shareit.user.UserRepository;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -14,7 +13,7 @@ import java.util.Optional;
 import java.util.Set;
 
 @Repository
-public class UserMemRepository implements UserRepository {
+public class UserMemRepository { //implements UserRepository
     private long idCounter = 0L;
     private final Map<Long, User> users = new HashMap<>();
     private final Set<String> emails = new HashSet<>();
@@ -23,17 +22,14 @@ public class UserMemRepository implements UserRepository {
         return ++idCounter;
     }
 
-    @Override
     public Optional<User> get(long id) {
         return Optional.ofNullable(users.get(id));
     }
 
-    @Override
     public boolean isEmailUsed(String email) {
         return emails.contains(email);
     }
 
-    @Override
     public User add(User newUser) {
         if (isEmailUsed(newUser.getEmail()))
             throw new DuplicatedDataException("Эл. почта " + newUser.getEmail() + " уже используется");
@@ -46,7 +42,6 @@ public class UserMemRepository implements UserRepository {
         return newUser;
     }
 
-    @Override
     public User update(User newUser) {
         // проверяем необходимые условия
         User oldUser = get(newUser.getId())
@@ -64,7 +59,6 @@ public class UserMemRepository implements UserRepository {
         return oldUser;
     }
 
-    @Override
     public void delete(User user) {
         users.remove(user.getId());
         emails.remove(user.getEmail());

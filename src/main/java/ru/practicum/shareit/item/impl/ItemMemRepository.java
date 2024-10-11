@@ -5,7 +5,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.Item;
-import ru.practicum.shareit.item.ItemRepository;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,7 +14,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Repository
-public class ItemMemRepository implements ItemRepository {
+public class ItemMemRepository { // implements ItemRepository
     private long idCounter = 0L;
     private final Map<Long, Item> items = new HashMap<>();
     private final Map<Long, List<Item>> ownerItems = new HashMap<>();
@@ -24,17 +23,14 @@ public class ItemMemRepository implements ItemRepository {
         return ++idCounter;
     }
 
-    @Override
     public Optional<Item> get(long id) {
         return Optional.ofNullable(items.get(id));
     }
 
-    @Override
     public List<Item> findAll(long ownerId) {
         return ownerItems.getOrDefault(ownerId, new ArrayList<>());
     }
 
-    @Override
     public List<Item> search(String text, long ownerId) {
         String t = text.toUpperCase();
         return items.values().stream()
@@ -44,7 +40,6 @@ public class ItemMemRepository implements ItemRepository {
                 .collect(Collectors.toList());
     }
 
-    @Override
     public Item add(Item newItem) {
         // формируем дополнительные данные
         newItem.setId(nextId());
@@ -55,7 +50,6 @@ public class ItemMemRepository implements ItemRepository {
         return newItem;
     }
 
-    @Override
     public Item update(Item newItem) {
         // проверяем необходимые условия
         Item oldItem = get(newItem.getId())
@@ -70,7 +64,6 @@ public class ItemMemRepository implements ItemRepository {
         return oldItem;
     }
 
-    @Override
     public void deleteByOwnerId(long ownerId) {
         items.values().removeIf(i -> i.getOwner() != null && i.getOwner().getId() == ownerId);
         ownerItems.remove(ownerId);
