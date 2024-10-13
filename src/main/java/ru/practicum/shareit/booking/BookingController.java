@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.shareit.booking.dto.BookingApproveDto;
 import ru.practicum.shareit.booking.dto.BookingCreateDto;
 import ru.practicum.shareit.booking.dto.BookingDto;
+import ru.practicum.shareit.util.Headers;
 
 import java.util.List;
 
@@ -28,7 +29,7 @@ public class BookingController {
     private final BookingService bookingService;
 
     @PostMapping
-    public BookingDto create(@RequestHeader("X-Sharer-User-Id") long userId, @Valid @RequestBody BookingCreateDto newBooking) {
+    public BookingDto create(@RequestHeader(Headers.USER_ID) long userId, @Valid @RequestBody BookingCreateDto newBooking) {
         log.info("==> create booking: {}", newBooking);
         BookingDto booking = bookingService.add(newBooking, userId);
         log.info("<== create booking: {}", booking);
@@ -36,7 +37,7 @@ public class BookingController {
     }
 
     @PatchMapping("/{bookingId}")
-    public BookingDto approve(@RequestHeader("X-Sharer-User-Id") long userId, @PathVariable long bookingId, @RequestParam boolean approved) {
+    public BookingDto approve(@RequestHeader(Headers.USER_ID) long userId, @PathVariable long bookingId, @RequestParam boolean approved) {
         log.info("==> approve bookingId = {}, ownerId = {}, approved = {}", bookingId, userId, approved);
         BookingApproveDto bookingApprove = new BookingApproveDto(bookingId, userId, approved);
         BookingDto booking = bookingService.approve(bookingApprove);
@@ -45,7 +46,7 @@ public class BookingController {
     }
 
     @GetMapping("/{bookingId}")
-    public BookingDto get(@RequestHeader("X-Sharer-User-Id") long userId, @PathVariable long bookingId) {
+    public BookingDto get(@RequestHeader(Headers.USER_ID) long userId, @PathVariable long bookingId) {
         log.info("==> get bookingId = {}, ownerId = {}", bookingId, userId);
         BookingDto booking = bookingService.get(bookingId, userId);
         log.info("<== get booking: {}, ownerId = {}", booking, userId);
@@ -53,7 +54,7 @@ public class BookingController {
     }
 
     @GetMapping
-    public List<BookingDto> findByBooker(@RequestHeader("X-Sharer-User-Id") long userId, @RequestParam(defaultValue = "ALL") BookingState state) {
+    public List<BookingDto> findByBooker(@RequestHeader(Headers.USER_ID) long userId, @RequestParam(defaultValue = "ALL") BookingState state) {
         log.info("==> findByBooker: {}, userId = {}", state, userId);
         List<BookingDto> bookings = bookingService.findByBooker(userId, state);
         log.info("<== findByBooker: {} - {}, userId = {}", state, bookings.size(), userId);
@@ -61,7 +62,7 @@ public class BookingController {
     }
 
     @GetMapping("/owner")
-    public List<BookingDto> findByOwner(@RequestHeader("X-Sharer-User-Id") long userId, @RequestParam(defaultValue = "ALL") BookingState state) {
+    public List<BookingDto> findByOwner(@RequestHeader(Headers.USER_ID) long userId, @RequestParam(defaultValue = "ALL") BookingState state) {
         log.info("==> findByOwner: {}, userId = {}", state, userId);
         List<BookingDto> bookings = bookingService.findByOwner(userId, state);
         log.info("<== findByOwner: {} - {}, userId = {}", state, bookings.size(), userId);
