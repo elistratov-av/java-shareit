@@ -17,5 +17,4 @@ public class ItemCreateDto {
     private final String description;
     @NotNull(message = "Статус доступности для аренды вещи не заполнен")
     private final Boolean available;
-    private final Long requestId;
 }

@@ -13,8 +13,12 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import ru.practicum.shareit.item.dto.CommentCreateDto;
+import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemCreateDto;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemInfoDto;
+import ru.practicum.shareit.util.Headers;
 
 import java.util.List;
 
@@ -27,23 +31,23 @@ public class ItemController {
     private final ItemService itemService;
 
     @GetMapping("/{itemId}")
-    public ItemDto get(@RequestHeader("X-Sharer-User-Id") long userId, @PathVariable int itemId) {
+    public ItemInfoDto get(@RequestHeader(Headers.USER_ID) long userId, @PathVariable int itemId) {
         log.info("==> get itemId = {}, ownerId = {}", itemId, userId);
-        ItemDto item = itemService.get(itemId);
+        ItemInfoDto item = itemService.get(itemId);
         log.info("<== get item: {}, ownerId = {}", item, userId);
         return item;
     }
 
     @GetMapping
-    public List<ItemDto> findAll(@RequestHeader("X-Sharer-User-Id") long userId) {
-        log.info("==> findAll ownerId = {}", userId);
-        List<ItemDto> items = itemService.findAll(userId);
-        log.info("<== findAll {} ownerId = {}", items.size(), userId);
+    public List<ItemInfoDto> findByOwnerId(@RequestHeader(Headers.USER_ID) long userId) {
+        log.info("==> findByOwnerId ownerId = {}", userId);
+        List<ItemInfoDto> items = itemService.findByOwnerId(userId);
+        log.info("<== findByOwnerId {} ownerId = {}", items.size(), userId);
         return items;
     }
 
     @PostMapping
-    public ItemDto create(@RequestHeader("X-Sharer-User-Id") long userId, @Valid @RequestBody ItemCreateDto newItem) {
+    public ItemDto create(@RequestHeader(Headers.USER_ID) long userId, @Valid @RequestBody ItemCreateDto newItem) {
         log.info("==> create item: {}, ownerId = {}", newItem, userId);
         ItemDto item = itemService.add(newItem, userId);
         log.info("<== create item: {}, ownerId = {}", item, userId);
@@ -51,7 +55,7 @@ public class ItemController {
     }
 
     @PatchMapping("/{itemId}")
-    public ItemDto update(@RequestHeader("X-Sharer-User-Id") long userId, @PathVariable long itemId, @Valid @RequestBody ItemDto newItem) {
+    public ItemDto update(@RequestHeader(Headers.USER_ID) long userId, @PathVariable long itemId, @Valid @RequestBody ItemDto newItem) {
         log.info("==> update item: {}, ownerId = {}", newItem, userId);
         newItem.setId(itemId);
         ItemDto item = itemService.update(newItem, userId);
@@ -60,10 +64,18 @@ public class ItemController {
     }
 
     @GetMapping("/search")
-    public List<ItemDto> search(@RequestHeader("X-Sharer-User-Id") long userId, @RequestParam String text) {
+    public List<ItemDto> search(@RequestHeader(Headers.USER_ID) long userId, @RequestParam String text) {
         log.info("==> search by: {}, ownerId = {}", text, userId);
         List<ItemDto> items = itemService.search(text, userId);
         log.info("<== search by: {} - {}, ownerId = {}", text, items.size(), userId);
         return items;
+    }
+
+    @PostMapping("/{itemId}/comment")
+    public CommentDto addComment(@RequestHeader(Headers.USER_ID) long userId, @PathVariable long itemId, @Valid @RequestBody CommentCreateDto comment) {
+        log.info("==> add comment: {}, authorId = {}, itemId = {}", comment, userId, itemId);
+        CommentDto commentDto = itemService.addComment(userId, itemId, comment);
+        log.info("<== add comment: {}", commentDto);
+        return commentDto;
     }
 }
